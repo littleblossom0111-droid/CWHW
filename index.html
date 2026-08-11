@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Blossoms - Homework</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6fb;font-family:Arial,Helvetica,sans-serif;color:#263238}
+.container{max-width:900px;margin:auto;padding:18px}
+h1{margin:0;font-size:24px}.subtitle{color:#667085;margin-top:4px}
+.panel{background:white;border-radius:18px;padding:20px;margin-bottom:18px;box-shadow:0 5px 20px #0000000d}
+.row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{font-size:13px;font-weight:700;display:block;margin-bottom:6px}
+input,textarea,select{width:100%;padding:11px 12px;border:1px solid #d9dee8;border-radius:10px;font-size:14px;background:#fff}
+textarea{min-height:70px;resize:vertical}
+.subject{border:1px solid #e2e7ef;border-radius:14px;padding:15px;margin-top:14px}
+.subject-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.subject-title{font-weight:800;font-size:17px}
+.cw-hw{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{background:#f8fafc;border-radius:12px;padding:12px}
+.box h4{margin:0 0 10px;font-size:14px}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+button{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
+.primary{background:#243b80;color:white}.secondary{background:#eef2ff;color:#243b80}.danger{background:#fff0f0;color:#c62828}
+.card-wrap{display:flex;justify-content:center}
+.card{width:720px;background:white;border-radius:24px;overflow:hidden;box-shadow:0 8px 30px #00000018}
+.card-top{padding:25px;text-align:center;background:linear-gradient(135deg,#243b80,#5b6fc7);color:white}
+.card-top .brand{font-size:27px;font-weight:900;letter-spacing:1px}
+.card-top .tag{font-size:12px;margin-top:4px;opacity:.9}
+.card-info{display:flex;justify-content:space-between;padding:14px 22px;background:#f5f7ff;font-size:14px;font-weight:700}
+.card-body{padding:20px}
+.subject-card{border:1px solid #e3e7ef;border-radius:15px;margin-bottom:14px;overflow:hidden}
+.subject-card h3{margin:0;padding:11px 14px;background:#f1f4ff;color:#243b80;font-size:16px}
+.section{padding:12px 14px;border-top:1px solid #edf0f5}
+.section b{font-size:13px}.line{margin-top:5px;font-size:14px;line-height:1.5}
+.footer{text-align:center;padding:0 20px 24px;font-size:13px;color:#667085;font-weight:700}
+.small{font-size:12px;color:#667085}
+@media(max-width:650px){
+ .row,.cw-hw{grid-template-columns:1fr}.container{padding:10px}
+ .card{width:100%}.card-info{gap:10px;flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>🌸 Little Blossoms Homework</h1>
+    <div class="subtitle">Create a beautiful WhatsApp-ready homework card</div>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <div><label>Date</label><input id="date" type="date"></div>
+      <div><label>Class</label><input id="className" placeholder="e.g. Nursery"></div>
+    </div>
+    <div id="subjects"></div>
+    <div class="buttons">
+      <button class="secondary" onclick="addSubject()">＋ Add Subject</button>
+      <button class="primary" onclick="generate()">Generate Homework Card</button>
+      <button class="secondary" onclick="clearForm()">Clear</button>
+    </div>
+  </div>
+
+  <div class="panel" id="previewPanel" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div><b>Preview</b><div class="small">Save this card as an image and send it on WhatsApp.</div></div>
+    </div>
+    <div class="card-wrap">
+      <div class="card" id="homeworkCard">
+        <div class="card-top">
+          <div class="brand">🌸 LITTLE BLOSSOMS 🌸</div>
+          <div class="tag">DAILY LEARNING & HOMEWORK</div>
+        </div>
+        <div class="card-info">
+          <span>📅 <span id="outDate">-</span></span>
+          <span>👧 CLASS: <span id="outClass">-</span></span>
+        </div>
+        <div class="card-body" id="outSubjects"></div>
+        <div class="footer">✨ Happy Learning! ✨<br>Little Blossoms</div>
+      </div>
+    </div>
+    <div class="buttons" style="justify-content:center">
+      <button class="primary" onclick="downloadCard()">⬇ Save as Image</button>
+      <button class="secondary" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let subjectCount=0;
+
+function addSubject(data={}){
+ subjectCount++;
+ const id=subjectCount;
+ const div=document.createElement('div');
+ div.className='subject';
+ div.id='subject-'+id;
+ div.innerHTML=`
+  <div class="subject-head">
+    <div class="subject-title">Subject ${id}</div>
+    <button class="danger" type="button" onclick="removeSubject(${id})">Remove</button>
+  </div>
+  <div style="margin-bottom:12px">
+    <label>Subject Name</label>
+    <input class="s-name" placeholder="English / Maths / Hindi / Activity" value="${esc(data.name||'')}">
+  </div>
+  <div class="cw-hw">
+    <div class="box">
+      <h4>📚 CLASSWORK (CW)</h4>
+      <label>Copy / Book</label>
+      <input class="cw-book" placeholder="e.g. English Writing Copy" value="${esc(data.cwBook||'')}">
+      <label style="margin-top:8px">Page</label>
+      <input class="cw-page" placeholder="e.g. 12" value="${esc(data.cwPage||'')}">
+      <label style="margin-top:8px">Work / Activity</label>
+      <textarea class="cw-work" placeholder="What was done in class?">${esc(data.cwWork||'')}</textarea>
+    </div>
+    <div class="box">
+      <h4>🏠 HOMEWORK (HW)</h4>
+      <label>Copy / Book</label>
+      <input class="hw-book" placeholder="e.g. ABC Book" value="${esc(data.hwBook||'')}">
+      <label style="margin-top:8px">Page</label>
+      <input class="hw-page" placeholder="e.g. 25" value="${esc(data.hwPage||'')}">
+      <label style="margin-top:8px">Work / Activity</label>
+      <textarea class="hw-work" placeholder="What should be done at home?">${esc(data.hwWork||'')}</textarea>
+    </div>
+  </div>`;
+ document.getElementById('subjects').appendChild(div);
+}
+function removeSubject(id){document.getElementById('subject-'+id)?.remove()}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function val(el){return el?.value.trim()||''}
+
+function generate(){
+ const date=document.getElementById('date').value;
+ const cls=val(document.getElementById('className'));
+ if(!date||!cls){alert('Please enter Date and Class.');return}
+ document.getElementById('outDate').textContent=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+ document.getElementById('outClass').textContent=cls;
+ let html='';
+ document.querySelectorAll('.subject').forEach((s)=>{
+   const name=val(s.querySelector('.s-name'));
+   const cwBook=val(s.querySelector('.cw-book')), cwPage=val(s.querySelector('.cw-page')), cwWork=val(s.querySelector('.cw-work'));
+   const hwBook=val(s.querySelector('.hw-book')), hwPage=val(s.querySelector('.hw-page')), hwWork=val(s.querySelector('.hw-work'));
+   if(!name && !cwWork && !hwWork)return;
+   html+=`<div class="subject-card">
+     <h3>📖 ${esc(name||'Learning Activity')}</h3>
+     ${(cwBook||cwPage||cwWork)?`<div class="section"><b>📚 CLASSWORK</b><div class="line">${cwBook?'Book/Copy: '+esc(cwBook)+'<br>':''}${cwPage?'Page: '+esc(cwPage)+'<br>':''}${cwWork?esc(cwWork):''}</div></div>`:''}
+     ${(hwBook||hwPage||hwWork)?`<div class="section"><b>🏠 HOMEWORK</b><div class="line">${hwBook?'Book/Copy: '+esc(hwBook)+'<br>':''}${hwPage?'Page: '+esc(hwPage)+'<br>':''}${hwWork?esc(hwWork):''}</div></div>`:''}
+   </div>`;
+ });
+ if(!html){alert('Please add at least one subject/activity.');return}
+ document.getElementById('outSubjects').innerHTML=html;
+ document.getElementById('previewPanel').style.display='block';
+ document.getElementById('previewPanel').scrollIntoView({behavior:'smooth'});
+}
+
+async function downloadCard(){
+ const card=document.getElementById('homeworkCard');
+ if(!card.innerHTML.trim())return;
+ const canvas=await html2canvas(card,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+ const a=document.createElement('a');
+ const d=document.getElementById('date').value||'homework';
+ a.download='Little-Blossoms-Homework-'+d+'.png';
+ a.href=canvas.toDataURL('image/png');
+ a.click();
+}
+function clearForm(){
+ if(!confirm('Clear all homework details?'))return;
+ document.getElementById('subjects').innerHTML='';
+ subjectCount=0;
+ document.getElementById('previewPanel').style.display='none';
+ document.getElementById('className').value='';
+ document.getElementById('date').value=new Date().toISOString().slice(0,10);
+ addSubject();
+}
+document.getElementById('date').value=new Date().toISOString().slice(0,10);
+addSubject();
+</script>
+</body>
+</html>
